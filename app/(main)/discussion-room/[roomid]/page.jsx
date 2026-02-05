@@ -17,6 +17,8 @@ function DiscussionRoom() {
   });
   const [expert, setExpert] = useState();
   const [enableMic, setEnableMic] = useState(false);
+  const [transcript, setTranscript] = useState("");
+  const [partialTranscript, setPartialTranscript] = useState("");
   const recorder = useRef(null);
   const RecordRTCRef = useRef(null);
   const realtimeTranscriber = useRef(null);
@@ -133,7 +135,16 @@ const connectToServer = async () => {
     });
 
     realtimeTranscriber.current.on("turn", (t) => {
-      if (t.transcript) console.log("Transcript:", t.transcript);
+      if (t.transcript) {
+        console.log("Final Transcript:", t.transcript);
+        setTranscript((prev) => prev + " " + t.transcript);
+      }
+    });
+
+    realtimeTranscriber.current.on("partial_transcript", (t) => {
+      if (t.partial_transcript) {
+        setPartialTranscript(t.partial_transcript);
+      }
     });
 
     realtimeTranscriber.current.on("error", console.error);
@@ -298,8 +309,34 @@ const disconnect = async (e) => {
           </div>
         </div>
         <div>
-          <div className="h-[60vh] bg-secondary border rounded-4xl flex flex-col items-center justify-center relative">
-            <h2>Chat Section</h2>
+          <div className="h-[60vh] bg-secondary border rounded-4xl flex flex-col p-4 relative overflow-hidden">
+            <div className="flex-1 overflow-y-auto mb-4 space-y-3">
+              {transcript ? (
+                <div>
+                  <h2 className="text-sm font-semibold text-gray-700 mb-2">Transcript:</h2>
+                  <p className="text-sm text-gray-900 whitespace-pre-wrap">{transcript}</p>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-400 text-sm">Your transcribed messages will appear here...</p>
+                </div>
+              )}
+              {partialTranscript && (
+                <p className="text-sm text-gray-500 italic">{partialTranscript}</p>
+              )}
+            </div>
+            {transcript && (
+              <Button
+                onClick={() => {
+                  setTranscript("");
+                  setPartialTranscript("");
+                }}
+                variant="outline"
+                size="sm"
+              >
+                Clear Transcript
+              </Button>
+            )}
           </div>
           <h2 className="mt-4 text-gray-400 text-sm">
             At the end of your conversation we will automatically generate
