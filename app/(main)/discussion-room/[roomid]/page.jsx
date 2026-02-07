@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
-import { AIModel, getToken } from "@/services/GlobalServices";
+import { AIModel, ConvertTextToSpeech, getToken } from "@/services/GlobalServices";
 import { Loader2, Loader2Icon } from "lucide-react";
 import { CoachingExperts } from "@/services/Options";
 import { UserButton } from "@stackframe/stack";
@@ -22,6 +22,7 @@ function DiscussionRoom() {
   const [isLoading, setIsLoading] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [partialTranscript, setPartialTranscript] = useState("");
+  const [audioUrl, setAudioUrl] = useState();
   const [conversation, setConversation] = useState([
     // {
     //   role: "system",
@@ -190,6 +191,15 @@ function DiscussionRoom() {
                     role: "system",
                     content: response
                   }]);
+
+                  // Convert AI response to speech
+                  try {
+                    const audioUrl = await ConvertTextToSpeech(response, expert?.name);
+                    console.log("Audio URL:", audioUrl);
+                    setAudioUrl(audioUrl);
+                  } catch (error) {
+                    console.error("Text to Speech conversion error:", error);
+                  }
                 }
               } catch (error) {
                 console.error("AI Model error:", error);
@@ -354,6 +364,7 @@ function DiscussionRoom() {
               />
             )}
             <h2 className="text-gray-500 text-sm">{expert?.name}</h2>
+            <audio src={audioUrl} autoPlay type="audio/mp3" />
             <div className="p-5 bg-gray-200 px-10 rounded-lg absolute bottom-5 right-5">
               <UserButton />
             </div>

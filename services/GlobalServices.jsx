@@ -1,5 +1,6 @@
 import axios from "axios";
 import { CoachingOptions } from "./Options";
+import { PollyClient, SynthesizeSpeechCommand } from "@aws-sdk/client-polly";
 
 export const getToken = async () => {
   const res = await axios.post("/api/getToken");
@@ -77,4 +78,32 @@ export const AIModel = async (topic, coachingOption, msg) => {
     }
     throw error;
   }
+}
+
+
+export const ConvertTextToSpeech = async (text, expertName) => {
+    const pollyClient = new PollyClient({
+        region: "us-east-1",
+        credentials: {
+            accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
+            secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_KEY,
+        },
+    })
+
+    const command = new SynthesizeSpeechCommand({
+        OutputFormat: "mp3",
+        Text: text,
+        VoiceId: expertName,
+    });
+
+    try {
+        const { AudioStream } = await pollyClient.send(command);
+        const audioArrayBuffer = await AudioStream.transformToByteArray();
+        const audioBlob = new Blob([audioArrayBuffer], { type: "audio/mp3" });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        return audioUrl;
+    } catch(e) {
+        console.error("Error converting text to speech:", e);
+        throw e;
+    }
 }
