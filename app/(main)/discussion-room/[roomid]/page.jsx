@@ -2,11 +2,11 @@
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import { AIModel, ConvertTextToSpeech, getToken } from "@/services/GlobalServices";
-import { Loader2, Loader2Icon } from "lucide-react";
+import { Loader2Icon } from "lucide-react";
 import { CoachingExperts } from "@/services/Options";
 import { UserButton } from "@stackframe/stack";
 import { StreamingTranscriber } from "assemblyai";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
@@ -17,6 +17,7 @@ function DiscussionRoom() {
   const DiscussionRoomData = useQuery(api.DiscussionRoom.GetDiscussionRoom, {
     id: roomid,
   });
+  const UpdateConversation = useMutation(api.DiscussionRoom.UpdateDiscussionRoomConversation);
   const [expert, setExpert] = useState();
   const [enableMic, setEnableMic] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -344,6 +345,19 @@ function DiscussionRoom() {
 
     setIsLoading(false);
     setEnableMic(false);
+
+    // Save conversation to database
+    if (DiscussionRoomData?._id) {
+      try {
+        await UpdateConversation({
+          id: DiscussionRoomData._id,
+          conversation: conversation
+        });
+        console.log("Conversation saved to database");
+      } catch (error) {
+        console.error("Failed to save conversation:", error);
+      }
+    }
   };
 
   return (
