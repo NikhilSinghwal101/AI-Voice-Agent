@@ -11,6 +11,7 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import ChatBox from "./_components/ChatBox";
+import { toast } from "sonner";
 
 function DiscussionRoom() {
   const { roomid } = useParams();
@@ -24,6 +25,7 @@ function DiscussionRoom() {
   const [transcript, setTranscript] = useState("");
   const [partialTranscript, setPartialTranscript] = useState("");
   const [audioUrl, setAudioUrl] = useState();
+  const [enableFeedbackNotes, setEnableFeedbackNotes] = useState(false);
   const [conversation, setConversation] = useState([
     // {
     //   role: "system",
@@ -195,7 +197,7 @@ function DiscussionRoom() {
 
                   // Convert AI response to speech
                   try {
-                    const audioUrl = await ConvertTextToSpeech(response, expert?.name);
+                    const audioUrl = await ConvertTextToSpeech(response, expert?.voiceId);
                     console.log("Audio URL:", audioUrl);
                     setAudioUrl(audioUrl);
                   } catch (error) {
@@ -309,10 +311,12 @@ function DiscussionRoom() {
       recorder.current.startRecording();
       setEnableMic(true);
       setIsLoading(false);
+      toast('Connected to server!');
     } catch (err) {
       console.error("❌ connectToServer failed:", err);
       setIsLoading(false);
       setEnableMic(false);
+      toast('Failed to connect to server. Please try again.');
     }
   };
 
@@ -343,9 +347,6 @@ function DiscussionRoom() {
       realtimeTranscriber.current = null;
     }
 
-    setIsLoading(false);
-    setEnableMic(false);
-
     // Save conversation to database
     if (DiscussionRoomData?._id) {
       try {
@@ -358,6 +359,11 @@ function DiscussionRoom() {
         console.error("Failed to save conversation:", error);
       }
     }
+
+    setIsLoading(false);
+    setEnableMic(false);
+    setEnableFeedbackNotes(true);
+    toast('Disconnected from server!');
   };
 
   return (
@@ -414,12 +420,11 @@ function DiscussionRoom() {
             //   partialTranscript={partialTranscript}
             //   setPartialTranscript={setPartialTranscript}
             conversation = {conversation}
+            enableFeedbackNotes={enableFeedbackNotes}
+            coachingOption={DiscussionRoomData?.coachingOption}
+            discussionRoomId={DiscussionRoomData?._id}
             />
           </div>
-          <h2 className="mt-4 text-gray-400 text-sm">
-            At the end of your conversation we will automatically generate
-            feedback/notes from your conversation
-          </h2>
         </div>
         <div></div>
       </div>

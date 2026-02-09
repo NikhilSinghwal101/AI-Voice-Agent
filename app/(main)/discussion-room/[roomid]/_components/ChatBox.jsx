@@ -1,9 +1,19 @@
+"use client";
 import { Button } from "@/components/ui/button";
-import React, { useEffect, useRef } from "react";
+import { api } from "@/convex/_generated/api";
+import React, { useEffect, useRef, useState } from "react";
 import "./chatbox.css";
+import { AIModelToGenerateFeedbackAndNotes } from "@/services/GlobalServices";
+import { LoaderCircle } from "lucide-react";
+import { useMutation } from "convex/react";
+import { toast } from "sonner";
 
-function ChatBox({ conversation }) {
+function ChatBox({ conversation, enableFeedbackNotes, coachingOption, discussionRoomId }) {
   const chatEndRef = useRef(null);
+  const [loadingFeedback, setLoadingFeedback] = useState(false);
+  const updateSummary = useMutation(
+    api.DiscussionRoom.UpdateDiscussionRoomSummary
+  );
 
   // Auto-scroll to bottom when conversation updates
   useEffect(() => {
@@ -11,6 +21,34 @@ function ChatBox({ conversation }) {
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [conversation]);
+
+  const GenerateFeedbackNotes = async () => {
+    try {
+      setLoadingFeedback(true);
+      const result = await AIModelToGenerateFeedbackAndNotes(
+        coachingOption,
+        conversation
+      );
+      console.log(result);
+      
+      // Only update if we have a valid discussion room ID
+      if (discussionRoomId) {
+        await updateSummary({
+          id: discussionRoomId,
+          summary: result,
+        });
+      }
+      setLoadingFeedback(false);
+
+      toast('Feedback/Notes saved!');
+    } catch (error) {
+      console.error("Error generating feedback/notes:", error);
+      setLoadingFeedback(false);
+      toast('Error generating feedback/notes!');
+      return;
+    }
+  };
+
   return (
     <div>
       <div className="h-[60vh] bg-secondary border rounded-xl flex flex-col p-4 relative overflow-y-auto scrollbar-hide">
@@ -48,6 +86,21 @@ function ChatBox({ conversation }) {
           </div>
         )}
       </div>
+      {!enableFeedbackNotes ? (
+        <h2 className="mt-4 text-gray-400 text-sm">
+          At the end of your conversation we will automatically generate
+          feedback/notes from your conversation
+        </h2>
+      ) : (
+        <Button
+          onClick={GenerateFeedbackNotes}
+          disabled={loadingFeedback}
+          className="mt-5 w-full cursor-pointer"
+        >
+          {loadingFeedback && <LoaderCircle className="animate-spin" />}
+          {loadingFeedback ? "Generating..." : "Generate Feedback/Notes"}
+        </Button>
+      )}
     </div>
   );
 }
