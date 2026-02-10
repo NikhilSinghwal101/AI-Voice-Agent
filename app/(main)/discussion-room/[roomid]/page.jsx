@@ -199,7 +199,9 @@ function DiscussionRoom() {
                   try {
                     const audioUrl = await ConvertTextToSpeech(response, expert?.voiceId);
                     console.log("Audio URL:", audioUrl);
-                    setAudioUrl(audioUrl);
+                    if (audioUrl) {
+                      setAudioUrl(audioUrl);
+                    }
                   } catch (error) {
                     console.error("Text to Speech conversion error:", error);
                   }
@@ -384,7 +386,7 @@ function DiscussionRoom() {
               />
             )}
             <h2 className="text-gray-500 text-sm">{expert?.name}</h2>
-            <audio src={audioUrl} autoPlay type="audio/mp3" />
+            {audioUrl && <audio src={audioUrl} autoPlay type="audio/mp3" />}
             <div className="p-5 bg-gray-200 px-10 rounded-lg absolute bottom-5 right-5">
               <UserButton />
             </div>
