@@ -1,9 +1,45 @@
 /* Hide scrollbar while keeping scroll functionality */
-.scrollbar-hide::-webkit-scrollbar {
+/* .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
 
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+} */
+
+
+.chatboxContainer {
+  height: 60vh;
+  overflow-y: scroll;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  scrollbar-width: none;
+}
+
+.chatboxContainer:hover {
+  scrollbar-width: thin;
+}
+
+/* Chrome, Safari, Edge */
+.chatboxContainer::-webkit-scrollbar {
+  width: 4px;
+  display: none;
+}
+
+.chatboxContainer:hover::-webkit-scrollbar {
+  display: block;
+}
+
+.chatboxContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chatboxContainer::-webkit-scrollbar-thumb {
+  background-color: #bbb;
+  border-radius: 2px;
+}
+
+.chatboxContainer::-webkit-scrollbar-thumb:hover {
+  background-color: #999;
 }

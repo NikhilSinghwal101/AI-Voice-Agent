@@ -7,6 +7,7 @@ import { CoachingOptions } from "@/services/Options";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import moment from "moment";
+import Link from "next/link";
 
 function History() {
   const convex = useConvex();
@@ -58,7 +59,9 @@ function History() {
                     <h2 className="text-gray-400 text-xs">{moment(item?._creationTime).fromNow()}</h2>
                   </div>
                 </div>
-                <Button variant="outline" className="invisible group-hover:visible cursor-pointer">View Notes</Button>
+                <Link href={`/view-summary/${item?._id}`}>
+                  <Button variant="outline" className="invisible group-hover:visible cursor-pointer">View Notes</Button>
+                </Link>
               </div>
             )
         )}

@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import React, { useEffect, useRef, useState } from "react";
-import "./chatbox.css";
+import "./ChatBox.css";
 import { AIModelToGenerateFeedbackAndNotes } from "@/services/GlobalServices";
 import { LoaderCircle } from "lucide-react";
 import { useMutation } from "convex/react";
@@ -51,7 +51,7 @@ function ChatBox({ conversation, enableFeedbackNotes, coachingOption, discussion
 
   return (
     <div>
-      <div className="h-[60vh] bg-secondary border rounded-xl flex flex-col p-4 relative overflow-y-auto scrollbar-hide">
+      <div className="border border-gray-100 bg-gray-100 rounded-xl flex flex-col relative chatboxContainer">
         {conversation && conversation.length > 0 ? (
           <>
             {conversation.map((item, index) => (
@@ -88,8 +88,8 @@ function ChatBox({ conversation, enableFeedbackNotes, coachingOption, discussion
       </div>
       {!enableFeedbackNotes ? (
         <h2 className="mt-4 text-gray-400 text-sm">
-          At the end of your conversation we will automatically generate
-          feedback/notes from your conversation
+          {/* At the end of your conversation we will automatically generate
+          feedback/notes from your conversation */}
         </h2>
       ) : (
         <Button
